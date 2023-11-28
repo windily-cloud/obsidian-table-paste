@@ -1,7 +1,8 @@
 import { SupabaseClient, createClient } from '@supabase/supabase-js'
-import { Notice } from 'obsidian'
+import { App, Notice } from 'obsidian'
 import WindilyHelper from 'src/main'
 import type { Database } from 'src/types/database'
+import dayjs from "dayjs"
 
 interface Article {
     uid: string
@@ -13,6 +14,7 @@ interface Article {
 
 export default class SupabaseService {
     supabase: SupabaseClient
+    app: App
     constructor(plugin: WindilyHelper) {
         const supabase = createClient<Database>(plugin.settings.supabaseUrl, plugin.settings.supabasePrivateKey)
         this.supabase = supabase
@@ -20,6 +22,11 @@ export default class SupabaseService {
 
     async uploadArticle(article: Article) {
         const remoteArticle = await this.getArticle(article.uid)
+        const currentFile = app.workspace.getActiveFile()
+        if (!currentFile) {
+            new Notice("No active file")
+            return
+        }
 
         // 如果文章不存在，就上传
         if (!remoteArticle) {
@@ -36,6 +43,14 @@ export default class SupabaseService {
             if (error) {
                 new Notice("上传文章失败：" + error.message)
             } else {
+                app.fileManager.processFrontMatter(
+                    currentFile,
+                    (frontmatter) => {
+                        if (frontmatter.uid) {
+                            frontmatter.ptime = dayjs().format("YYYYMMDDHHmmss")
+                        }
+                    }
+                );
                 new Notice("上传文章成功")
             }
             return
@@ -60,6 +75,14 @@ export default class SupabaseService {
                 .eq('uid', article.uid)
 
             if (error) {
+                app.fileManager.processFrontMatter(
+                    currentFile,
+                    (frontmatter) => {
+                        if (frontmatter.uid) {
+                            frontmatter.ptime = dayjs().format("YYYYMMDDHHmmss")
+                        }
+                    }
+                );
                 new Notice("更新文章失败" + error.message)
             } else {
                 new Notice("更新文章成功")

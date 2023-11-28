@@ -20,6 +20,7 @@ esbuild.build({
 	external: [
 		'obsidian',
 		'electron',
+        'moment',
 		'@codemirror/autocomplete',
 		'@codemirror/collab',
 		'@codemirror/commands',
