@@ -15,7 +15,7 @@ esbuild.build({
 	banner: {
 		js: banner,
 	},
-	entryPoints: ['main.ts'],
+	entryPoints: ['./src/main.ts'],
 	bundle: true,
 	external: [
 		'obsidian',
@@ -38,5 +38,6 @@ esbuild.build({
 	logLevel: "info",
 	sourcemap: prod ? false : 'inline',
 	treeShaking: true,
-	outfile: 'main.js',
+	// outfile: 'main.js',
+	outdir: 'D:/Project/Obsidian/obsidian-develop/.obsidian/plugins/windily-helper'
 }).catch(() => process.exit(1));
