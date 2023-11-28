@@ -7,6 +7,7 @@ interface Article {
     uid: string
     title: string
     content: string
+    metadata: any
     hash: string
 }
 
@@ -24,8 +25,13 @@ export default class SupabaseService {
         if (!remoteArticle) {
             const { error } = await this.supabase
                 .from('article')
-                .insert(JSON.stringify(article))
-                .select()
+                .insert({
+                    uid: article.uid,
+                    title: article.title,
+                    content: article.content,
+                    metadata: article.metadata,
+                    hash: article.hash
+                })
 
             if (error) {
                 new Notice("上传文章失败：" + error.message)
@@ -48,6 +54,7 @@ export default class SupabaseService {
                 .update({
                     title: article.title,
                     content: article.content,
+                    metadata: article.metadata,
                     hash: article.hash
                 })
                 .eq('uid', article.uid)

@@ -1,4 +1,4 @@
-import { Plugin } from 'obsidian';
+import { Notice, Plugin, requestUrl } from 'obsidian';
 import { remote } from 'electron'
 import { uploadCurrentFile } from './article';
 import SupabaseService from './supabase';
@@ -54,6 +54,16 @@ export default class WindilyHelper extends Plugin {
             name: "Upload current article",
             callback: () => {
                 uploadCurrentFile(this.app, this.supabaseService)
+            }
+        })
+
+        this.addCommand({
+            id: "build-blog",
+            name: "Build blog",
+            callback: async () => {
+                const response = await requestUrl('http://windilycloud.cn:8888/buildBlog')
+                const result = await response.text
+                new Notice(result + "(运行成功)")
             }
         })
     }

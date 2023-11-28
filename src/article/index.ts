@@ -10,6 +10,7 @@ export const uploadCurrentFile = async (app: App, supabaseService: SupabaseServi
     }
     const fileContent = await app.vault.read(currentFile)
     const frontMatter = await app.metadataCache.getFileCache(currentFile)?.frontmatter
+    const headings = await app.metadataCache.getFileCache(currentFile)?.headings
     if (!frontMatter) {
         new Notice("No frontmatter")
         return
@@ -21,10 +22,17 @@ export const uploadCurrentFile = async (app: App, supabaseService: SupabaseServi
         new Notice("No uid")
         return
     }
+
+    if(!headings) {
+        new Notice("No headings")
+        return
+    }
+
     const article = {
         uid,
         title: currentFile.basename,
         content: fileContent,
+        metadata: frontMatter,
         hash: createMd5(fileContent).toString(),
     }
     return await supabaseService.uploadArticle(article)
