@@ -1,6 +1,7 @@
 import { App, Notice } from "obsidian"
 import SupabaseService from "src/supabase"
 import { createMd5 } from "src/utils/createMd5"
+import updateYamlPublish from "src/utils/updateYamlPublish"
 
 export const uploadCurrentFile = async (app: App, supabaseService: SupabaseService) => {
     const currentFile = app.workspace.getActiveFile()
@@ -9,10 +10,8 @@ export const uploadCurrentFile = async (app: App, supabaseService: SupabaseServi
         return
     }
 
-
-    const fileContent = await app.vault.read(currentFile)
     const frontMatter = await app.metadataCache.getFileCache(currentFile)?.frontmatter
-    const headings = await app.metadataCache.getFileCache(currentFile)?.headings
+
     if (!frontMatter) {
         new Notice("No frontmatter")
         return
@@ -26,8 +25,13 @@ export const uploadCurrentFile = async (app: App, supabaseService: SupabaseServi
         return
     }
 
-    if (!headings) {
-        new Notice("No headings")
+    await updateYamlPublish(app, true)
+
+    const fileContent = await app.vault.read(currentFile)
+    const currentFrontMatter = await app.metadataCache.getFileCache(currentFile)?.frontmatter
+
+    if (!currentFrontMatter) {
+        new Notice("No frontmatter or published not set to true")
         return
     }
 
@@ -35,7 +39,7 @@ export const uploadCurrentFile = async (app: App, supabaseService: SupabaseServi
         uid,
         title: currentFile.basename,
         content: fileContent,
-        metadata: frontMatter,
+        metadata: currentFrontMatter,
         hash: createMd5(fileContent).toString(),
     }
     return await supabaseService.uploadArticle(article)

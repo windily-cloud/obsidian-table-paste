@@ -2,7 +2,7 @@ import { SupabaseClient, createClient } from '@supabase/supabase-js'
 import { App, Notice } from 'obsidian'
 import WindilyHelper from 'src/main'
 import type { Database } from 'src/types/database'
-import dayjs from "dayjs"
+import updateYamlPublish from 'src/utils/updateYamlPublish'
 
 interface Article {
     uid: string
@@ -37,20 +37,14 @@ export default class SupabaseService {
                     title: article.title,
                     content: article.content,
                     metadata: article.metadata,
-                    hash: article.hash
+                    hash: article.hash,
+                    updated_at: new Date()
                 })
 
             if (error) {
+                updateYamlPublish(app, false)
                 new Notice("上传文章失败：" + error.message)
             } else {
-                app.fileManager.processFrontMatter(
-                    currentFile,
-                    (frontmatter) => {
-                        if (frontmatter.uid) {
-                            frontmatter.ptime = dayjs().format("YYYYMMDDHHmmss")
-                        }
-                    }
-                );
                 new Notice("上传文章成功")
             }
             return
@@ -70,19 +64,13 @@ export default class SupabaseService {
                     title: article.title,
                     content: article.content,
                     metadata: article.metadata,
-                    hash: article.hash
+                    hash: article.hash,
+                    updated_at: new Date()
                 })
                 .eq('uid', article.uid)
 
             if (error) {
-                app.fileManager.processFrontMatter(
-                    currentFile,
-                    (frontmatter) => {
-                        if (frontmatter.uid) {
-                            frontmatter.ptime = dayjs().format("YYYYMMDDHHmmss")
-                        }
-                    }
-                );
+                updateYamlPublish(app, false)
                 new Notice("更新文章失败" + error.message)
             } else {
                 new Notice("更新文章成功")
